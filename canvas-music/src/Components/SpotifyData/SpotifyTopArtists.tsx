@@ -1,11 +1,19 @@
 import React, {useEffect, useState} from "react";
+import ReactDOM from 'react-dom';
+import Button from '@mui/material/Button';
 import axios from "axios";
+
+import TopArtists from "../../Interfaces/topArtists.interfaces";
+
+import TopArtistsCollage from './TopArtistsCollage';
+
 
 const ALBUM_ENDPOINT = "https://api.spotify.com/v1/me/top/artists";
 
 const SpotifyTopArtists = () => {
     const [token, setToken] = useState('');
-    const [data, setData] = useState({});
+    const [data, setData] = useState<TopArtists>();
+    const [loadingData, setLoadingData] = useState(true);
 
     useEffect(() => {
         if(localStorage.getItem('access_token')){
@@ -18,6 +26,13 @@ const SpotifyTopArtists = () => {
         }
     }, [])
 
+    useEffect(() => {
+        if (data != undefined){
+            console.log(data);
+            setLoadingData(false);
+        }
+    }, [data])
+
     const handleGetTopAlbums = () => {
         axios.get(ALBUM_ENDPOINT, {
             headers: {
@@ -25,16 +40,22 @@ const SpotifyTopArtists = () => {
             },
         }).then(response => {
             setData(response.data);
-            console.log(data);
         }).catch((error) => {
             console.log(error);
             console.log("Token: " + token);
         })
     }
 
-    return(
-        <button onClick={handleGetTopAlbums}>Get Top Artists</button>
-    );
+    if (loadingData == true){
+        return(
+        <Button onClick={handleGetTopAlbums} variant="outlined">Get Top Artists</Button>
+        );    
+    } else {
+        return(
+            <TopArtistsCollage artistsData={data}/>
+        );    
+    }
+
 }
 
 export default SpotifyTopArtists;

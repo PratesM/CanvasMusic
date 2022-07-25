@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { Typography, Button } from '@mui/material';
 
-import SpotifyTopAlbums from './Components/SpotifyData/SpotifyTopArtists';
+import SpotifyTopArtists from './Components/SpotifyData/SpotifyTopArtists';
+
 
 const SPACE_DELIM = "%20";
 
@@ -25,6 +28,8 @@ const getSpotifyAuthReturn = (hash:string) => {
 }
 
 const WebApp = () => {
+    const [isLogged, setIsLogged] = useState(false);
+
     useEffect(() => {
         if(window.location.hash){
             const {access_token, expire_time, token_type} = getSpotifyAuthReturn(window.location.hash);
@@ -34,6 +39,8 @@ const WebApp = () => {
             localStorage.setItem("access_token", access_token);
             localStorage.setItem("expire_time", expire_time);
             localStorage.setItem("tokenType", token_type);
+
+            setIsLogged(true);
         }
 
     })
@@ -41,12 +48,21 @@ const WebApp = () => {
     const handleLogin = () => {
         window.location.href = `${SPOTIFY_AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URL_AFTER_LOGIN}&scope=${SCOPES_URL}&response_type=token&show_dialog=true`;
     }
-    return(
-        <div>
-            <button onClick={handleLogin}>Spotify Login</button>
-            <SpotifyTopAlbums></SpotifyTopAlbums>
-        </div>
-    );
+
+    if(isLogged){
+        return(
+            <div>
+                <SpotifyTopArtists/>
+            </div>
+        )
+    } else {
+        return(
+            <div>
+                <Typography> Sign into Spotify to get your collages.</Typography>
+                <Button onClick={handleLogin} variant="outlined">Spotify Login</Button>
+            </div> 
+        )
+    }
 }
 
 export default WebApp;
